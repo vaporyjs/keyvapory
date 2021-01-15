@@ -280,7 +280,7 @@ describe("Private key recovery", function () {
   });
 });
 
-describe("Derive Ethereum address from private key", function () {
+describe("Derive Vapory address from private key", function () {
   var test = function (t) {
     it(t.description + ": " + t.privateKey, function () {
       t.assertions(keythereum.privateKeyToAddress(t.privateKey));
@@ -533,7 +533,7 @@ describe("Decryption", function () {
 });
 
 // Test vectors:
-// https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition
+// https://github.com/vaporyco/wiki/wiki/Web3-Secret-Storage-Definition
 
 describe("Key derivation", function () {
 

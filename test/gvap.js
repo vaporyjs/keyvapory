@@ -6,7 +6,7 @@ var fs = require("fs");
 var join = require("path").join;
 var crypto = require("crypto");
 var assert = require("chai").assert;
-var geth = require("geth");
+var gvap = require("gvap");
 var keythereum = require("../");
 var checkKeyObj = require("./checkKeyObj");
 
@@ -22,7 +22,7 @@ var options = {
     rpcport: 8547,
     nodiscover: null,
     datadir: DATADIR,
-    ipcpath: join(DATADIR, "geth.ipc"),
+    ipcpath: join(DATADIR, "gvap.ipc"),
     password: join(DATADIR, ".password")
   }
 };
@@ -30,9 +30,9 @@ var options = {
 var pbkdf2 = keythereum.crypto.pbkdf2;
 var pbkdf2Sync = keythereum.crypto.pbkdf2Sync;
 
-// geth.debug = true;
+// gvap.debug = true;
 
-function createEthereumKey(passphrase) {
+function createVaporyKey(passphrase) {
   var dk = keythereum.create();
   var key = keythereum.dump(passphrase, dk.privateKey, dk.salt, dk.iv);
   return JSON.stringify(key);
@@ -40,7 +40,7 @@ function createEthereumKey(passphrase) {
 
 keythereum.constants.quiet = true;
 
-describe("Unlock randomly-generated accounts in geth", function () {
+describe("Unlock randomly-generated accounts in gvap", function () {
   var password, hashRounds, i;
 
   var test = function (t) {
@@ -59,7 +59,7 @@ describe("Unlock randomly-generated accounts in geth", function () {
         keythereum.crypto.pbkdf2Sync = pbkdf2Sync;
       }
 
-      json = createEthereumKey(t.password);
+      json = createVaporyKey(t.password);
       assert.isNotNull(json);
 
       keyObject = JSON.parse(json);
@@ -71,12 +71,12 @@ describe("Unlock randomly-generated accounts in geth", function () {
           var fail;
           if (ex) return done(ex);
           options.flags.unlock = keyObject.address;
-          options.flags.etherbase = keyObject.address;
-          geth.start(options, {
+          options.flags.vaporbase = keyObject.address;
+          gvap.start(options, {
             stderr: function (data) {
-              if (geth.debug) process.stdout.write(data);
+              if (gvap.debug) process.stdout.write(data);
               if (data.toString().indexOf("16MB") > -1) {
-                geth.trigger(null, geth.proc);
+                gvap.trigger(null, gvap.proc);
               }
             },
             close: function () {
@@ -90,18 +90,18 @@ describe("Unlock randomly-generated accounts in geth", function () {
             }
           }, function (err, spawned) {
             if (err) return done(err);
-            if (!spawned) return done(new Error("where's the geth?"));
-            geth.stdout("data", function (data) {
+            if (!spawned) return done(new Error("where's the gvap?"));
+            gvap.stdout("data", function (data) {
               var unlocked = "Account '" + keyObject.address+
                 "' (" + keyObject.address + ") unlocked.";
               if (data.toString().indexOf(unlocked) > -1) {
-                geth.stop();
+                gvap.stop();
               }
             });
-            geth.stderr("data", function (data) {
+            gvap.stderr("data", function (data) {
               if (data.toString().indexOf("Fatal") > -1) {
                 fail = new Error(data);
-                geth.stop();
+                gvap.stop();
               }
             });
           });
