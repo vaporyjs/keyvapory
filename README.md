@@ -1,31 +1,31 @@
-# keythereum
+# keyvapory
 
-[![Build Status](https://travis-ci.org/vaporyjs/keythereum.svg?branch=master)](https://travis-ci.org/vaporyjs/keythereum) [![Coverage Status](https://coveralls.io/repos/github/vaporyjs/keythereum/badge.svg?branch=master)](https://coveralls.io/github/vaporyjs/keythereum?branch=master) [![npm version](https://badge.fury.io/js/keythereum.svg)](http://badge.fury.io/js/keythereum)
+[![Build Status](https://travis-ci.org/vaporyjs/keyvapory.svg?branch=master)](https://travis-ci.org/vaporyjs/keyvapory) [![Coverage Status](https://coveralls.io/repos/github/vaporyjs/keyvapory/badge.svg?branch=master)](https://coveralls.io/github/vaporyjs/keyvapory?branch=master) [![npm version](https://badge.fury.io/js/keyvapory.svg)](http://badge.fury.io/js/keyvapory)
 
-Keythereum is a JavaScript tool to generate, import and export Vapory keys.  This provides a simple way to use the same account locally and in web wallets.  It can be used for verifiable cold storage wallets.
+Keyvapory is a JavaScript tool to generate, import and export Vapory keys.  This provides a simple way to use the same account locally and in web wallets.  It can be used for verifiable cold storage wallets.
 
-Keythereum uses the same key derivation functions (PBKDF2-SHA256 or scrypt), symmetric ciphers (AES-128-CTR or AES-128-CBC), and message authentication codes as [gvap](https://github.com/vapory/go-vapory).  You can export your generated key to file, copy it to your data directory's keystore, and immediately start using it in your local Vapory client.
+Keyvapory uses the same key derivation functions (PBKDF2-SHA256 or scrypt), symmetric ciphers (AES-128-CTR or AES-128-CBC), and message authentication codes as [gvap](https://github.com/vapory/go-vapory).  You can export your generated key to file, copy it to your data directory's keystore, and immediately start using it in your local Vapory client.
 
-*Note: starting in version 0.5.0, keythereum's `encrypt` and `decrypt` functions both return Buffers instead of strings.  This is a breaking change for anyone using these functions directly!*
+*Note: starting in version 0.5.0, keyvapory's `encrypt` and `decrypt` functions both return Buffers instead of strings.  This is a breaking change for anyone using these functions directly!*
 
 ## Installation
 
 ```
-npm install keythereum
+npm install keyvapory
 ```
 
 ## Usage
 
-To use keythereum in Node.js, just `require` it:
+To use keyvapory in Node.js, just `require` it:
 
 ```javascript
-var keythereum = require("keythereum");
+var keyvapory = require("keyvapory");
 ```
 
-A minified, browserified file `dist/keythereum.min.js` is included for use in the browser.  Including this file simply attaches the `keythereum` object to `window`:
+A minified, browserified file `dist/keyvapory.min.js` is included for use in the browser.  Including this file simply attaches the `keyvapory` object to `window`:
 
 ```html
-<script src="dist/keythereum.min.js" type="text/javascript"></script>
+<script src="dist/keyvapory.min.js" type="text/javascript"></script>
 ```
 
 ### Key creation
@@ -34,11 +34,11 @@ Generate a new random private key (256 bit), as well as the salt (256 bit) used 
 
 ```javascript
 // optional private key and initialization vector sizes in bytes
-// (if params is not passed to create, keythereum.constants is used by default)
+// (if params is not passed to create, keyvapory.constants is used by default)
 var params = { keyBytes: 32, ivBytes: 16 };
 
 // synchronous
-var dk = keythereum.create(params);
+var dk = keyvapory.create(params);
 // dk:
 {
     privateKey: <Buffer ...>,
@@ -47,7 +47,7 @@ var dk = keythereum.create(params);
 }
 
 // asynchronous
-keythereum.create(params, function (dk) {
+keyvapory.create(params, function (dk) {
     // do stuff!
 });
 ```
@@ -64,7 +64,7 @@ var kdf = "pbkdf2"; // or "scrypt" to use the scrypt kdf
 The `dump` function is used to export key info to keystore ["secret-storage" format](https://github.com/vapory/wiki/wiki/Web3-Secret-Storage-Definition).  If a callback function is supplied as the sixth parameter to `dump`, it will run asynchronously:
 
 ```javascript
-// Note: if options is unspecified, the values in keythereum.constants are used.
+// Note: if options is unspecified, the values in keyvapory.constants are used.
 var options = {
   kdf: "pbkdf2",
   cipher: "aes-128-ctr",
@@ -76,7 +76,7 @@ var options = {
 };
 
 // synchronous
-var keyObject = keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options);
+var keyObject = keyvapory.dump(password, dk.privateKey, dk.salt, dk.iv, options);
 // keyObject:
 {
   address: "008aeeda4d805471df9b2a5b0f38a0c3bcba786b",
@@ -100,7 +100,7 @@ var keyObject = keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options
 }
 
 // asynchronous
-keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
+keyvapory.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
   // do stuff!
 });
 ```
@@ -108,7 +108,7 @@ keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyO
 `dump` creates an object and not a JSON string.  In Node, the `exportToFile` method provides an easy way to export this formatted key object to file.  It creates a JSON file in the `keystore` sub-directory, and uses gvap's current file-naming convention (ISO timestamp concatenated with the key's derived Vapory address).
 
 ```javascript
-keythereum.exportToFile(keyObject);
+keyvapory.exportToFile(keyObject);
 ```
 
 After successful key export, you will see a message like:
@@ -130,32 +130,32 @@ Importing a key from gvap's keystore can only be done on Node.  The JSON file is
 var datadir = "/home/jack/.vapory-test";
 
 // Synchronous
-var keyObject = keythereum.importFromFile(address, datadir);
+var keyObject = keyvapory.importFromFile(address, datadir);
 
 // Asynchronous
-keythereum.importFromFile(address, datadir, function (keyObject) {
+keyvapory.importFromFile(address, datadir, function (keyObject) {
   // do stuff
 });
 ```
 This has been tested with version 3 and version 1, but not version 2, keys.  (Please send me a version 2 keystore file if you have one, so I can test it!)
 
-To recover the plaintext private key from the key object, use `keythereum.recover`.  The private key is returned as a Buffer.
+To recover the plaintext private key from the key object, use `keyvapory.recover`.  The private key is returned as a Buffer.
 
 ```javascript
 // synchronous
-var privateKey = keythereum.recover(password, keyObject);
+var privateKey = keyvapory.recover(password, keyObject);
 // privateKey:
 <Buffer ...>
 
 // Asynchronous
-keythereum.recover(password, keyObject, function (privateKey) {
+keyvapory.recover(password, keyObject, function (privateKey) {
   // do stuff
 });
 ```
 
 ### Hashing rounds
 
-By default, keythereum uses 65536 hashing rounds in its key derivation functions, compared to the 262144 gvap uses by default.  (Keythereum's JSON output files are still compatible with gvap, however, since they tell gvap how many rounds to use.)  These values are user-editable: `keythereum.constants.pbkdf2.c` is the number of rounds for PBKDF2, and `keythereum.constants.scrypt.n` is the number of rounds for scrypt.
+By default, keyvapory uses 65536 hashing rounds in its key derivation functions, compared to the 262144 gvap uses by default.  (Keyvapory's JSON output files are still compatible with gvap, however, since they tell gvap how many rounds to use.)  These values are user-editable: `keyvapory.constants.pbkdf2.c` is the number of rounds for PBKDF2, and `keyvapory.constants.scrypt.n` is the number of rounds for scrypt.
 
 ## Tests
 

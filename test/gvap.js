@@ -7,7 +7,7 @@ var join = require("path").join;
 var crypto = require("crypto");
 var assert = require("chai").assert;
 var gvap = require("gvap");
-var keythereum = require("../");
+var keyvapory = require("../");
 var checkKeyObj = require("./checkKeyObj");
 
 var NUM_TESTS = 1000;
@@ -27,18 +27,18 @@ var options = {
   }
 };
 
-var pbkdf2 = keythereum.crypto.pbkdf2;
-var pbkdf2Sync = keythereum.crypto.pbkdf2Sync;
+var pbkdf2 = keyvapory.crypto.pbkdf2;
+var pbkdf2Sync = keyvapory.crypto.pbkdf2Sync;
 
 // gvap.debug = true;
 
 function createVaporyKey(passphrase) {
-  var dk = keythereum.create();
-  var key = keythereum.dump(passphrase, dk.privateKey, dk.salt, dk.iv);
+  var dk = keyvapory.create();
+  var key = keyvapory.dump(passphrase, dk.privateKey, dk.salt, dk.iv);
   return JSON.stringify(key);
 }
 
-keythereum.constants.quiet = true;
+keyvapory.constants.quiet = true;
 
 describe("Unlock randomly-generated accounts in gvap", function () {
   var password, hashRounds, i;
@@ -52,11 +52,11 @@ describe("Unlock randomly-generated accounts in gvap", function () {
       this.timeout(TIMEOUT*2);
 
       if (t.sjcl) {
-        keythereum.crypto.pbkdf2 = undefined;
-        keythereum.crypto.pbkdf2Sync = undefined;
+        keyvapory.crypto.pbkdf2 = undefined;
+        keyvapory.crypto.pbkdf2Sync = undefined;
       } else {
-        keythereum.crypto.pbkdf2 = pbkdf2;
-        keythereum.crypto.pbkdf2Sync = pbkdf2Sync;
+        keyvapory.crypto.pbkdf2 = pbkdf2;
+        keyvapory.crypto.pbkdf2Sync = pbkdf2Sync;
       }
 
       json = createVaporyKey(t.password);
@@ -64,9 +64,9 @@ describe("Unlock randomly-generated accounts in gvap", function () {
 
       keyObject = JSON.parse(json);
       assert.isObject(keyObject);
-      checkKeyObj.structure(keythereum, keyObject);
+      checkKeyObj.structure(keyvapory, keyObject);
 
-      keythereum.exportToFile(keyObject, join(DATADIR, "keystore"), function (keypath) {
+      keyvapory.exportToFile(keyObject, join(DATADIR, "keystore"), function (keypath) {
         fs.writeFile(options.flags.password, t.password, function (ex) {
           var fail;
           if (ex) return done(ex);
@@ -115,8 +115,8 @@ describe("Unlock randomly-generated accounts in gvap", function () {
     password = crypto.randomBytes(Math.ceil(Math.random()*100));
     hashRounds = Math.ceil(Math.random() * 300000);
 
-    keythereum.constants.pbkdf2.c = hashRounds;
-    keythereum.constants.scrypt.n = hashRounds;
+    keyvapory.constants.pbkdf2.c = hashRounds;
+    keyvapory.constants.scrypt.n = hashRounds;
 
     test({
       sjcl: false,

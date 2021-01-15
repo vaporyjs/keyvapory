@@ -1,5 +1,5 @@
 {
-  "name": "keythereum",
+  "name": "keyvapory",
   "version": "1.0.2",
   "description": "Create, import and export Vapory keys",
   "main": "index.js",
@@ -12,19 +12,19 @@
     "gvap": "mocha -R progress test/keys.js && mocha -R progress test/gvap.js",
     "lint": "eslint index.js && eslint gulpfile.js && eslint test/*.js",
     "coverage": "istanbul cover -x **/lib/** ./node_modules/mocha/bin/_mocha test/keys.js",
-    "build": "browserify ./exports.js > ./dist/keythereum.js && uglifyjs ./dist/keythereum.js > ./dist/keythereum.min.js",
+    "build": "browserify ./exports.js > ./dist/keyvapory.js && minify ./dist/keyvapory.js --out-file ./dist/keyvapory.min.js",
     "build:tests": "browserify test/keys.js > test/browser/bundle.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vaporyjs/keythereum.git"
+    "url": "git+https://github.com/vaporyjs/keyvapory.git"
   },
   "author": "Jack Peterson <jack@tinybike.net>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vaporyjs/keythereum/issues"
+    "url": "https://github.com/vaporyjs/keyvapory/issues"
   },
-  "homepage": "https://github.com/vaporyjs/keythereum#readme",
+  "homepage": "https://github.com/vaporyjs/keyvapory#readme",
   "dependencies": {
     "keccak": "1.2.0",
     "secp256k1": "3.2.5",
@@ -32,6 +32,7 @@
     "uuid": "3.0.0"
   },
   "devDependencies": {
+    "babel-minify": "^0.5.1",
     "babel-plugin-transform-es3-member-expression-literals": "6.22.0",
     "babel-plugin-transform-es3-property-literals": "6.22.0",
     "babel-preset-env": "1.6.0",

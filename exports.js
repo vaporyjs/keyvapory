@@ -1,2 +1,2 @@
-var keythereum = global.keythereum || require('./');
-global.keythereum = keythereum;
+var keyvapory = global.keyvapory || require('./');
+global.keyvapory = keyvapory;

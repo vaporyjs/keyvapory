@@ -6,7 +6,7 @@ var fs = require("fs");
 var path = require("path");
 var crypto = require("crypto");
 var assert = require("chai").assert;
-var keythereum = require("../");
+var keyvapory = require("../");
 var checkKeyObj = require("./checkKeyObj");
 var DEBUG = false;
 
@@ -17,12 +17,12 @@ var TIMEOUT = 120000;
 var privateKey = crypto.randomBytes(32);
 
 // suppress logging
-keythereum.constants.quiet = !DEBUG;
+keyvapory.constants.quiet = !DEBUG;
 
 describe("Check if valid hex-encoded string", function () {
   var test = function (t) {
     it(t.description, function () {
-      t.assertions(keythereum.isHex(t.s));
+      t.assertions(keyvapory.isHex(t.s));
     });
   };
   test({
@@ -79,7 +79,7 @@ describe("Check if valid hex-encoded string", function () {
 describe("Check if valid base64-encoded string", function () {
   var test = function (t) {
     it(t.description, function () {
-      t.assertions(keythereum.isBase64(t.s));
+      t.assertions(keyvapory.isBase64(t.s));
     });
   };
   // test cases: https://github.com/chriso/validator.js/blob/master/test/validators.js
@@ -135,7 +135,7 @@ describe("Check if valid base64-encoded string", function () {
 describe("Convert a string to a Buffer", function () {
   var test = function (t) {
     it(t.description, function () {
-      t.assertions(keythereum.str2buf(t.params.str, t.params.enc));
+      t.assertions(keyvapory.str2buf(t.params.str, t.params.enc));
     });
   };
   test({
@@ -236,7 +236,7 @@ describe("Convert a string to a Buffer", function () {
 describe("Check if selected cipher is available", function () {
   var test = function (t) {
     it(t.description, function () {
-      t.assertions(keythereum.isCipherAvailable(t.cipher));
+      t.assertions(keyvapory.isCipherAvailable(t.cipher));
     });
   };
   test({
@@ -283,9 +283,9 @@ describe("Private key recovery", function () {
 describe("Derive Vapory address from private key", function () {
   var test = function (t) {
     it(t.description + ": " + t.privateKey, function () {
-      t.assertions(keythereum.privateKeyToAddress(t.privateKey));
-      t.assertions(keythereum.privateKeyToAddress(Buffer.from(t.privateKey, "hex")));
-      t.assertions(keythereum.privateKeyToAddress(Buffer.from(t.privateKey, "hex").toString("base64")));
+      t.assertions(keyvapory.privateKeyToAddress(t.privateKey));
+      t.assertions(keyvapory.privateKeyToAddress(Buffer.from(t.privateKey, "hex")));
+      t.assertions(keyvapory.privateKeyToAddress(Buffer.from(t.privateKey, "hex").toString("base64")));
     });
   };
   test({
@@ -356,13 +356,13 @@ describe("Create random private key, salt and initialization vector", function (
       it("create key " + i + ": " + JSON.stringify(params), function (done) {
 
         // synchronous
-        test(keythereum.create(), keythereum.constants);
-        test(keythereum.create(params), params);
+        test(keyvapory.create(), keyvapory.constants);
+        test(keyvapory.create(params), params);
 
         // asynchronous
-        keythereum.create(null, function (dk) {
-          test(dk, keythereum.constants);
-          keythereum.create(params, function (dk) {
+        keyvapory.create(null, function (dk) {
+          test(dk, keyvapory.constants);
+          keyvapory.create(params, function (dk) {
             test(dk, params);
             done();
           });
@@ -370,7 +370,7 @@ describe("Create random private key, salt and initialization vector", function (
       });
     };
 
-    runtest(keythereum.constants);
+    runtest(keyvapory.constants);
     runtest({ keyBytes: 32, ivBytes: 16 });
   };
 
@@ -384,13 +384,13 @@ describe("Encryption", function () {
     var label = t.input.cipher + ": " + JSON.stringify(t.input.plaintext)+
       " -> " + t.expected.ciphertext;
     it(label, function () {
-      var oldCipher = keythereum.constants.cipher;
-      keythereum.constants.cipher = t.input.cipher;
+      var oldCipher = keyvapory.constants.cipher;
+      keyvapory.constants.cipher = t.input.cipher;
       assert.strictEqual(
-        keythereum.encrypt(t.input.plaintext, t.input.key, t.input.iv).toString("base64"),
+        keyvapory.encrypt(t.input.plaintext, t.input.key, t.input.iv).toString("base64"),
         t.expected.ciphertext
       );
-      keythereum.constants.cipher = oldCipher;
+      keyvapory.constants.cipher = oldCipher;
     });
   };
 
@@ -461,13 +461,13 @@ describe("Decryption", function () {
   var test = function (t) {
     var label = t.input.cipher + ": " + JSON.stringify(t.input.ciphertext) + " -> " + t.expected.plaintext;
     it(label, function () {
-      var oldCipher = keythereum.constants.cipher;
-      keythereum.constants.cipher = t.input.cipher;
+      var oldCipher = keyvapory.constants.cipher;
+      keyvapory.constants.cipher = t.input.cipher;
       assert.strictEqual(
-        keythereum.decrypt(t.input.ciphertext, t.input.key, t.input.iv).toString("hex"),
+        keyvapory.decrypt(t.input.ciphertext, t.input.key, t.input.iv).toString("hex"),
         t.expected.plaintext
       );
-      keythereum.constants.cipher = oldCipher;
+      keyvapory.constants.cipher = oldCipher;
     });
   };
 
@@ -541,23 +541,23 @@ describe("Key derivation", function () {
     var pbkdf2, pbkdf2Sync;
 
     before(function () {
-      pbkdf2 = keythereum.crypto.pbkdf2;
-      pbkdf2Sync = keythereum.crypto.pbkdf2Sync;
+      pbkdf2 = keyvapory.crypto.pbkdf2;
+      pbkdf2Sync = keyvapory.crypto.pbkdf2Sync;
     });
 
     after(function () {
-      keythereum.crypto.pbkdf2 = pbkdf2;
-      keythereum.crypto.pbkdf2Sync = pbkdf2Sync;
+      keyvapory.crypto.pbkdf2 = pbkdf2;
+      keyvapory.crypto.pbkdf2Sync = pbkdf2Sync;
     });
 
     it("using crypto: " + t.input.kdf, function (done) {
       var derivedKey;
       this.timeout(TIMEOUT);
-      keythereum.crypto.pbkdf2 = pbkdf2;
-      keythereum.crypto.pbkdf2Sync = pbkdf2Sync;
+      keyvapory.crypto.pbkdf2 = pbkdf2;
+      keyvapory.crypto.pbkdf2Sync = pbkdf2Sync;
 
       // synchronous
-      derivedKey = keythereum.deriveKey(
+      derivedKey = keyvapory.deriveKey(
         t.input.password,
         t.input.salt,
         { kdf: t.input.kdf }
@@ -566,7 +566,7 @@ describe("Key derivation", function () {
       assert.strictEqual(derivedKey.toString("hex"), t.expected);
 
       // asynchronous
-      keythereum.deriveKey(
+      keyvapory.deriveKey(
         t.input.password,
         t.input.salt,
         { kdf: t.input.kdf },
@@ -580,11 +580,11 @@ describe("Key derivation", function () {
     it("using sjcl: " + t.input.kdf, function (done) {
       var derivedKey;
       this.timeout(TIMEOUT);
-      keythereum.crypto.pbkdf2 = undefined;
-      keythereum.crypto.pbkdf2Sync = undefined;
+      keyvapory.crypto.pbkdf2 = undefined;
+      keyvapory.crypto.pbkdf2Sync = undefined;
 
       // synchronous
-      derivedKey = keythereum.deriveKey(
+      derivedKey = keyvapory.deriveKey(
         t.input.password,
         t.input.salt,
         { kdf: t.input.kdf }
@@ -593,7 +593,7 @@ describe("Key derivation", function () {
       assert.strictEqual(derivedKey.toString("hex"), t.expected);
 
       // asynchronous
-      keythereum.deriveKey(
+      keyvapory.deriveKey(
         t.input.password,
         t.input.salt,
         { kdf: t.input.kdf },
@@ -628,7 +628,7 @@ describe("Message authentication code", function () {
 
   var test = function (t) {
     it("convert " + JSON.stringify(t.input) + " -> " + t.output, function () {
-      var mac = keythereum.getMAC(t.input.derivedKey, t.input.ciphertext);
+      var mac = keyvapory.getMAC(t.input.derivedKey, t.input.ciphertext);
       assert.strictEqual(mac, t.output);
     });
   };
@@ -658,7 +658,7 @@ describe("Dump private key", function () {
       this.timeout(TIMEOUT);
 
       // synchronous
-      keyObject = keythereum.dump(
+      keyObject = keyvapory.dump(
         t.input.password,
         t.input.privateKey,
         t.input.salt,
@@ -666,11 +666,11 @@ describe("Dump private key", function () {
         { kdf: t.input.kdf }
       );
       if (keyObject.error) return done(keyObject);
-      checkKeyObj.structure(keythereum, keyObject);
-      checkKeyObj.values(keythereum, t, keyObject);
+      checkKeyObj.structure(keyvapory, keyObject);
+      checkKeyObj.values(keyvapory, t, keyObject);
 
       // asynchronous
-      keythereum.dump(
+      keyvapory.dump(
         t.input.password,
         t.input.privateKey,
         t.input.salt,
@@ -678,8 +678,8 @@ describe("Dump private key", function () {
         { kdf: t.input.kdf },
         function (keyObj) {
           if (keyObj.error) return done(keyObj);
-          checkKeyObj.structure(keythereum, keyObj);
-          checkKeyObj.values(keythereum, t, keyObj);
+          checkKeyObj.structure(keyvapory, keyObj);
+          checkKeyObj.values(keyvapory, t, keyObj);
           done();
         }
       );
@@ -750,7 +750,7 @@ describe("Dump private key", function () {
 describe("Generate keystore filename", function () {
   var test = function (t) {
     it(t.address, function () {
-      t.assertions(keythereum.generateKeystoreFilename(t.address));
+      t.assertions(keyvapory.generateKeystoreFilename(t.address));
     });
   };
   test({
@@ -786,7 +786,7 @@ describe("Export to file", function () {
 
   var keyObj;
 
-  if (keythereum.browser) return;
+  if (keyvapory.browser) return;
 
   keyObj = {
     address: "008aeeda4d805471df9b2a5b0f38a0c3bcba786b",
@@ -814,7 +814,7 @@ describe("Export to file", function () {
     this.timeout(TIMEOUT);
 
     // synchronous
-    keypath = keythereum.exportToFile(keyObj);
+    keypath = keyvapory.exportToFile(keyObj);
     outfile = keypath.split("/");
     assert.isArray(outfile);
     outfile = outfile[outfile.length - 1];
@@ -823,7 +823,7 @@ describe("Export to file", function () {
     fs.unlinkSync(keypath);
 
     // asynchronous
-    keythereum.exportToFile(keyObj, null, function (keyPath) {
+    keyvapory.exportToFile(keyObj, null, function (keyPath) {
       var outFile = keyPath.split("/");
       assert.isArray(outFile);
       outFile = outFile[outFile.length - 1];
@@ -838,16 +838,16 @@ describe("Export to file", function () {
   it("export key to json (browser)", function (done) {
     var json;
     this.timeout(TIMEOUT);
-    keythereum.browser = true;
+    keyvapory.browser = true;
 
     // synchronous
-    json = keythereum.exportToFile(keyObj);
+    json = keyvapory.exportToFile(keyObj);
     assert.strictEqual(json, JSON.stringify(keyObj));
 
     // asynchronous
-    keythereum.exportToFile(keyObj, null, function (json) {
+    keyvapory.exportToFile(keyObj, null, function (json) {
       assert.strictEqual(json, JSON.stringify(keyObj));
-      keythereum.browser = false;
+      keyvapory.browser = false;
       done();
     });
   });
@@ -855,19 +855,19 @@ describe("Export to file", function () {
 
 describe("Import from keystore file", function () {
 
-  if (keythereum.browser) return;
+  if (keyvapory.browser) return;
 
   function test(t) {
     var label = "[" + t.expected.crypto.kdf + "] import " + t.input.address + " from file";
     it(label, function (done) {
       var keyObject;
       this.timeout(TIMEOUT);
-      keyObject = keythereum.importFromFile(t.input.address, t.input.datadir);
-      checkKeyObj.structure(keythereum, keyObject);
-      checkKeyObj.values(keythereum, t, keyObject);
-      keythereum.importFromFile(t.input.address, t.input.datadir, function (keyObj) {
-        checkKeyObj.structure(keythereum, keyObj);
-        checkKeyObj.values(keythereum, t, keyObj);
+      keyObject = keyvapory.importFromFile(t.input.address, t.input.datadir);
+      checkKeyObj.structure(keyvapory, keyObject);
+      checkKeyObj.values(keyvapory, t, keyObject);
+      keyvapory.importFromFile(t.input.address, t.input.datadir, function (keyObj) {
+        checkKeyObj.structure(keyvapory, keyObj);
+        checkKeyObj.values(keyvapory, t, keyObj);
         done();
       });
     });
@@ -1106,11 +1106,11 @@ describe("Recover plaintext private key from key object", function () {
       this.timeout(TIMEOUT);
 
       // synchronous
-      dk = keythereum.recover(t.input.password, t.input.keyObject);
+      dk = keyvapory.recover(t.input.password, t.input.keyObject);
       assert.strictEqual(dk.toString("hex"), t.expected);
 
       // asynchronous
-      keythereum.recover(t.input.password, t.input.keyObject, function (dk) {
+      keyvapory.recover(t.input.password, t.input.keyObject, function (dk) {
         assert.strictEqual(dk.toString("hex"), t.expected);
         done();
       });
